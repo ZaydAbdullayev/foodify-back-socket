@@ -28,7 +28,7 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("/accept/order", (data) => {
-    io.emit("/get/message", data);
+    io.emit(`/get/message${data?.user_id}`, data);
   });
 });
 
