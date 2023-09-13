@@ -20,7 +20,47 @@ class OrderService {
       throw err;
     }
   }
+  static async updateStatus(io, data) {
+    return new Promise((resolve, reject) => {
+      try {
+        const sql = "UPDATE Orders SET status = ? WHERE id = ?";
 
+        db.query(sql, [data.status, data.id], async (err, result) => {
+          const order_info = await this.getMyOrders(data.user_id);
+          if (err) reject(err);
+          const new_data = await JSON.parse(JSON.stringify(order_info));
+          io.emit(`/get/order/status/${data?.user_id}`, new_data);
+          if (result?.affectedRows) {
+            resolve("Order_status is updated");
+          } else {
+            reject("Order_status could not be updated");
+          }
+        });
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+  static async getMyOrders(id) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // await this.updateViews(id);
+        const sql =
+          "SELECT * FROM Orders WHERE user_id = ? ORDER BY receivedAt DESC";
+        db.query(sql, id, (err, result) => {
+          if (err) reject(err);
+
+          if (result?.length) {
+            resolve(result);
+          } else {
+            resolve(null);
+          }
+        });
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
   static async saveToDatabase(data) {
     return new Promise((resolve, reject) => {
       const sql = "INSERT INTO Orders SET ?";

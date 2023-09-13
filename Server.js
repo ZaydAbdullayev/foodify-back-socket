@@ -30,6 +30,13 @@ io.on("connection", (socket) => {
   socket.on("/accept/order", (data) => {
     io.emit(`/get/message/${data?.user_id}`, data);
   });
+  socket.on("/update/order/status", async (data) => {
+    try {
+      await OrderService.updateStatus(io, data);
+    } catch (err) {
+      console.error(err);
+    }
+  });
 });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
